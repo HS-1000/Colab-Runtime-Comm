@@ -36,3 +36,19 @@ def folder_size(folder_path):
 			total += os.path.getsize(file_path)
 	total = total / 1024**2
 	return total
+
+def delete_oldest_file(folder_path):
+	files = [(os.path.join(dirpath, filename), os.path.getmtime(os.path.join(dirpath, filename)), os.path.getsize(os.path.join(dirpath, filename))) 
+			 for dirpath, _, filenames in os.walk(folder_path) 
+			 for filename in filenames]
+	files.sort(key=lambda x: x[1])
+	if not files:
+		return 0
+	for f in files:
+		oldest_file_path, _, oldest_file_size = f
+		try:
+			os.remove(oldest_file_path)
+			return oldest_file_size
+		except Exception as e:
+			continue
+	return 0

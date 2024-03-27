@@ -4,6 +4,7 @@ import functions as fu
 
 
 class Session:
+	#TODO allow_delay항상 True로 변경하기
 	def __init__(self, server_path, wate_time=60, allow_delay=600) -> None:
 		self.request_path = {}
 		self.server = server_path
@@ -31,7 +32,7 @@ class Session:
 		_, data = fu.read_pickle(self.request_path[req_id])
 		if data["status"] == "delay":
 			if self.delay:
-				new_req_id = data["new_request_id"]
+				new_req_id = data["return"]["new_request_id"]
 				del self.request_path[req_id]
 				self.request_path[new_req_id] = os.path.join(self.join, f"response/{new_req_id}.pickle")
 				req_id = new_req_id
