@@ -12,6 +12,10 @@ class Session:
 		self.delay = allow_delay
 	
 	def request(self, params):
+		"""
+		Args:
+			params: <dict>, include "api_path", "args":<list>, "kwargs":<dict>
+		"""
 		req_id = fu.random_with_time()
 		req_path = os.path.join(self.server, f"request/{req_id}.pickle")
 		result, msg = fu.create_pickle(req_path, params)
@@ -30,7 +34,7 @@ class Session:
 				if wait > self.wate:
 					return False
 		_, data = fu.read_pickle(self.request_path[req_id])
-		if data["status"] == "delay":
+		if data["status"] == "delay": # delay기능 삭제 예정
 			if self.delay:
 				new_req_id = data["return"]["new_request_id"]
 				del self.request_path[req_id]
