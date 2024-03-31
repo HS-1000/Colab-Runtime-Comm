@@ -34,25 +34,25 @@ class Session:
 				if wait > self.wate:
 					return False
 		_, data = fu.read_pickle(self.request_path[req_id])
-		if data["status"] == "delay": # delay기능 삭제 예정
-			if self.delay:
-				new_req_id = data["return"]["new_request_id"]
-				del self.request_path[req_id]
-				self.request_path[new_req_id] = os.path.join(self.join, f"response/{new_req_id}.pickle")
-				req_id = new_req_id
-				wait = 0
-				while True:
-					if os.path.exists(self.request_pathp[req_id]):
-						break
-					else:
-						time.sleep(1)
-						wait += 1
-						if wait > self.delay:
-							return False
-				_, data = fu.read_pickle(self.request_path[req_id])
-				return data["return"]
-			else:
-				return False
-		else: # data["status"] == "complete"
-			return data["return"]
+		# if data["status"] == "delay": # delay기능 삭제 예정
+		# 	if self.delay:
+		# 		new_req_id = data["return"]["new_request_id"]
+		# 		del self.request_path[req_id]
+		# 		self.request_path[new_req_id] = os.path.join(self.join, f"response/{new_req_id}.pickle")
+		# 		req_id = new_req_id
+		# 		wait = 0
+		# 		while True:
+		# 			if os.path.exists(self.request_pathp[req_id]):
+		# 				break
+		# 			else:
+		# 				time.sleep(1)
+		# 				wait += 1
+		# 				if wait > self.delay:
+		# 					return False
+		# 		_, data = fu.read_pickle(self.request_path[req_id])
+		# 		return data["return"]
+		# 	else:
+		# 		return False
+		# else: # data["status"] == "complete"
+		return data["return"]
 

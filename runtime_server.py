@@ -38,13 +38,13 @@ class RuntimeServer:
 				os.remove(req_path)
 		return result, err
 
-	def make_delay(self, req_id):
-		new_req_id = fu.random_with_time()
-		return self.response(
-			req_id,
-			"delay",
-			{"new_request_id" : new_req_id}
-		)
+	# def make_delay(self, req_id):
+	# 	new_req_id = fu.random_with_time()
+	# 	return self.response(
+	# 		req_id,
+	# 		"delay",
+	# 		{"new_request_id" : new_req_id}
+	# 	)
 
 	def create_api(self, api_path:str, func:callable):
 		"""
