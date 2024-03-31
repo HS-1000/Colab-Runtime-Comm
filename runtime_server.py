@@ -17,6 +17,7 @@ class RuntimeServer:
 		self.server = server_path
 		self.server_api = NestedDict()
 		self.start_time = None
+		self.pass_files = []
 		if not os.path.exists(os.path.join(server_path, "request")):
 			os.mkdir(os.path.join(server_path, "request"))
 		if not os.path.exists(os.path.join(server_path, "response")):
@@ -37,14 +38,6 @@ class RuntimeServer:
 			if os.path.exists(req_path):
 				os.remove(req_path)
 		return result, err
-
-	# def make_delay(self, req_id):
-	# 	new_req_id = fu.random_with_time()
-	# 	return self.response(
-	# 		req_id,
-	# 		"delay",
-	# 		{"new_request_id" : new_req_id}
-	# 	)
 
 	def create_api(self, api_path:str, func:callable):
 		"""
@@ -103,30 +96,49 @@ class RuntimeServer:
 			else:
 				break
 
+	def is_request_valid(self, file_path):
+		# pickle파일인자
+		# pass_files에 존재하는지
+		# 파일 수정시간
+		file_time = os.path.getmtime(file_path)
+		if self.start_time > file_time:
+			return False
+		file_name = os.path.basename(file_path)
+		req_id, ext = os.path.splitext(file_name)
+		if req_id in self.pass_files:
+			return False
+		if ext != ".pickle":
+			return False
+		return req_id
+
 	def run(self):
-		pass
-		#TODO response 폴더 확인
-		# ^^^ 요청 파일 반복문
-		# ^^^ 	요청파일 내용확인
-		# ^^^ 	응답파일 생성, 처리된 요청파일 삭제
-		# ^^^ 	사용중인 저장공간 확인
-		# ^^^ 요청이 없었다면 잠시 time.sleep(5)
-		# ^^^ 
-		# ^^^ 
 		self.start_time = int(time.time())
 		req_dir = os.path.join(self.server, "request")
 		while True:
 			files = os.listdir(req_dir)
 			for f in files:
-				req_id, ext = os.path.splitext(f)
-				if ext != ".pickle":
+				# req_id, ext = os.path.splitext(f)
+				# if ext != ".pickle":
+				# 	continue
+				file_path = os.path.join(req_dir, f)
+				req_id = self.is_request_valid(file_path)
+				if not req_id:
+					self.pass_files.append(f[:-7])
 					continue
-				req = fu.read_pickle(os.path.join(req_dir, f))
+				_, req = fu.read_pickle(os.path.join(req_dir, f))
 				api_path = req["api_path"]
 				# call api func
 				# write pickle file
 				# ^^^ add try and continue
-				res = self.call_api(api_path, *req["args"], **req["kwargs"])
+				if not "args" in req:
+					args = []
+				else:
+					args = req["args"]
+				if not "kwargs" in req:
+					kwargs = {}
+				else:
+					kwargs = req["kwargs"]
+				res = self.call_api(api_path, *args, **kwargs)
 				self.response(req_id, "complete", res) # delay기능 삭제 예정
 			self.clean_file()
 			time.sleep(5)
