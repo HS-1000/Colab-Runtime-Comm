@@ -65,11 +65,16 @@ class RuntimeServer:
 			return api_func(*args, **kwargs)
 
 	def clean_file(self):
+		server_files = self.life_time_files[:]
+		save_dir = os.path.join(self.server, "server_save")
+		save_files = os.listdir(save_dir)
+		for f in save_files:
+			server_files.append(os.path.join(save_dir, f))
 		if self.max_memory:
 			used_size = fu.folder_size(os.path.join(self.server, "response"))
 			if used_size > self.max_memory:
 				target_size = used_size - self.max_memory
-			files = [(p, os.path.getmtime(p), os.path.getsize(p)/1024**2) for p in self.life_time_files]
+			files = [(p, os.path.getmtime(p), os.path.getsize(p)/1024**2) for p in server_files]
 			files.sort(key=lambda x: x[1])
 			deleted_size = 0
 			for file_path, _, file_size in files:
@@ -85,7 +90,7 @@ class RuntimeServer:
 				print("\nWARNING: 서버 메모리 초과됨")
 				print(f"Used: {int(used_size-deleted_size)}/{self.max_memory}")
 		now = time.time()
-		for p in self.life_time_files:
+		for p in server_files:
 			file_time = os.path.getmtime(p)
 			if file_time < (now - self.file_life_time):
 				try:
