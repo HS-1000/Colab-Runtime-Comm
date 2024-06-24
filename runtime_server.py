@@ -95,24 +95,26 @@ class RuntimeServer:
 			if file_time < (now - self.file_life_time):
 				try:
 					os.remove(p)
-					self.life_time_files.remove(p)
-				except:
+					if p in self.life_time_files:
+						self.life_time_files.remove(p)
+				except Exception as e:
+					print(e)
 					continue
-			else:
-				break
 
 	def is_request_valid(self, file_path):
 		# pickle파일인자
 		# pass_files에 존재하는지
 		# 파일 수정시간
 		file_time = os.path.getmtime(file_path)
-		if self.start_time > file_time:
-			return False
 		file_name = os.path.basename(file_path)
 		req_id, ext = os.path.splitext(file_name)
 		if req_id in self.pass_files:
 			return False
-		if ext != ".pickle":
+		if self.start_time > file_time:
+			self.pass_files.append(req_id)
+			return False
+		elif ext != ".pickle":
+			self.pass_files.append(req_id)
 			return False
 		return req_id
 
@@ -128,7 +130,6 @@ class RuntimeServer:
 				file_path = os.path.join(req_dir, f)
 				req_id = self.is_request_valid(file_path)
 				if not req_id:
-					self.pass_files.append(f[:-7])
 					continue
 				_, req = fu.read_pickle(os.path.join(req_dir, f))
 				api_path = req["api_path"]
